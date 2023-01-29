@@ -1,10 +1,10 @@
 from django.shortcuts import render
-from rest_framework import generics, status
-from rest_framework.permissions import AllowAny
+from rest_framework import generics, status, permissions
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from accounts.models import User
-from accounts.serializers import RegisterSerializer
+from accounts.serializers import RegisterSerializer, UserSerializer, UpdateUserSerializer
 from accounts.service import is_already_exists
 
 
@@ -22,3 +22,23 @@ class RegisterView(generics.CreateAPIView):
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class GetAuthUserAPIView(generics.ListAPIView):
+    queryset = User.objects.all()
+    permission_classes = (IsAuthenticated, )
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+        user = User.objects.filter(pk=self.request.user.pk)
+        return user
+
+
+class UpdateUserAPIView(generics.UpdateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (IsAuthenticated, )
+    serializer_class = UpdateUserSerializer
+
+    def get_queryset(self):
+        user = User.objects.filter(pk=self.request.user.pk)
+        return user

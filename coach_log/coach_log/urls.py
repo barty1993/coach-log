@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from accounts.views import RegisterView
+from accounts.views import RegisterView, GetAuthUserAPIView, UpdateUserAPIView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,4 +25,7 @@ urlpatterns = [
     path('api/registration/', RegisterView.as_view(), name="registration"),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    path('api/user/', GetAuthUserAPIView.as_view(), name='update user'),
+    path('api/user/<int:pk>/', UpdateUserAPIView.as_view(), name='update user'),
 ]

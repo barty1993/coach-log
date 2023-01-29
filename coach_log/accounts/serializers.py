@@ -1,13 +1,12 @@
 from rest_framework import serializers
-
 from accounts.models import User
 
 
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True)
-    first_name = serializers.CharField(required=True)
-    last_name = serializers.CharField(required=True)
+    first_name = serializers.CharField(required=True, min_length=2)
+    last_name = serializers.CharField(required=True, min_length=2)
     birthday = serializers.DateField(default=None)
     about_me = serializers.CharField(default=None)
     class Meta:
@@ -26,3 +25,28 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+
+class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    birthday = serializers.DateField()
+    about_me = serializers.CharField()
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault())
+    class Meta:
+        model = User
+        fields = ('id', 'email', 'first_name', 'last_name', 'birthday', 'about_me', 'user')
+
+
+class UpdateUserSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(min_length=2)
+    last_name = serializers.CharField(min_length=2)
+    birthday = serializers.DateField()
+    about_me = serializers.CharField()
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault())
+    class Meta:
+        model = User
+        fields = ('id', 'first_name', 'last_name', 'birthday', 'about_me', 'user')
