@@ -1,6 +1,7 @@
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
+from accounts.Validators import set_validate_birthday_or_none
 
 
 class UserManager(BaseUserManager):
@@ -79,4 +80,7 @@ class User(AbstractBaseUser):
     def save(self, *args, **kwargs):
         if not self.id and not self.staff and not self.admin:
             self.password = make_password(self.password)
+
+        self.birthday = set_validate_birthday_or_none(self.birthday)
+        print(self.birthday)
         super().save(*args, **kwargs)
