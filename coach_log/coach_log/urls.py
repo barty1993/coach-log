@@ -14,13 +14,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from accounts.views import RegisterView, GetAuthUserAPIView, UpdateUserAPIView
+from gum.views import ListGumAPIView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('__debug__/', include('debug_toolbar.urls')),
     # accounts
     path('api/registration/', RegisterView.as_view(), name="registration"),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -28,4 +30,6 @@ urlpatterns = [
 
     path('api/user/', GetAuthUserAPIView.as_view(), name='get auth user'),
     path('api/user/<int:pk>/', UpdateUserAPIView.as_view(), name='update user'),
+
+    path('api/gum/', ListGumAPIView.as_view(), name='get all gums')
 ]

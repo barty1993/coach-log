@@ -59,7 +59,7 @@ class User(AbstractBaseUser):
     objects = UserManager()
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} {self.email}"
+        return f"{self.first_name} {self.last_name}"
 
     def has_perm(self, perm, obj=None):
         return True
