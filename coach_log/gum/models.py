@@ -30,8 +30,14 @@ class Gum(models.Model):
     address = models.CharField(max_length=255)
     phone = models.CharField(validators=[phone_regex], max_length=17, blank=True)
     date_create = models.DateTimeField(auto_now_add=True)
-    coaches = models.ManyToManyField(User, related_name="gum_coaches")
+    coaches = models.ManyToManyField(User, through='CoachInGum')
 
     def __str__(self):
         return self.title
+
+
+class CoachInGum(models.Model):
+    gum = models.ForeignKey(Gum, on_delete=models.CASCADE)
+    coach = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_agree = models.BooleanField(default=False)
 

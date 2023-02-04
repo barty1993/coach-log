@@ -30,7 +30,7 @@ class GetAuthUserAPIView(generics.ListAPIView):
     serializer_class = UserSerializer
 
     def get_queryset(self):
-        user = User.objects.filter(user=self.request.user)
+        user = User.objects.filter(id=self.request.user.id)
         return user
 
 

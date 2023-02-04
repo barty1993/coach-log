@@ -1,3 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
+from log.models import Group, Athlete, Membership
+
+admin.site.register([Group, Athlete, Membership])

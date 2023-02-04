@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'gum',
+    'log',
+
     "debug_toolbar",
     "django_filters",
 ]
