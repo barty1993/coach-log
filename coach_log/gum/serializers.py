@@ -14,10 +14,9 @@ class GumListSerializer(serializers.ModelSerializer):
         fields = ('id','owner', 'avatar', 'city', 'title','address', 'about_gum', 'phone', 'kind_of_sport')
 
 
-class GumSerializer(serializers.Serializer):
-
+class GumCreateUpdateSerializer(serializers.Serializer):
+    id = serializers.ReadOnlyField()
     city = serializers.CharField()
-    kind_of_sport = serializers.StringRelatedField(many=True, read_only=True)
     title = serializers.CharField()
     about_gum = serializers.CharField()
     address = serializers.CharField()
@@ -29,5 +28,7 @@ class GumSerializer(serializers.Serializer):
         return value
 
 
+class KindOfSportSerializer(serializers.Serializer):
+    kind_of_sport = serializers.StringRelatedField()
 
 
