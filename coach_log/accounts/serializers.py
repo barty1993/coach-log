@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from accounts.models import User
+from gum.serializers import GumListSerializer
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -35,9 +36,10 @@ class UserSerializer(serializers.ModelSerializer):
     about_me = serializers.CharField()
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault())
+    gums = GumListSerializer(many=True)
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'birthday', 'about_me', 'user')
+        fields = ('id', 'email', 'first_name', 'last_name', 'birthday', 'about_me', 'user', 'gums')
 
 
 class UpdateUserSerializer(serializers.ModelSerializer):

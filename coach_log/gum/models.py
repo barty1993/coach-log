@@ -22,7 +22,7 @@ class KindOfSport(models.Model):
 
 class Gum(models.Model):
     avatar = models.ImageField(blank=True, null=True)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="o_gums")
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="gums")
     city = models.ForeignKey(City, related_name="city", on_delete=models.SET_NULL, null=True)
     kind_of_sport = models.ManyToManyField(KindOfSport, related_name="kind_of_sports")
     title = models.CharField(max_length=255)
