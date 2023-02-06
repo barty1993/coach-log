@@ -82,5 +82,4 @@ class User(AbstractBaseUser):
             self.password = make_password(self.password)
 
         self.birthday = set_validate_birthday_or_none(self.birthday)
-        print(self.birthday)
         super().save(*args, **kwargs)

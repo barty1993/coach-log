@@ -1,7 +1,8 @@
-from django.shortcuts import render
-from rest_framework import generics, status, permissions
+from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenViewBase
 
 from accounts.models import User
 from accounts.serializers import RegisterSerializer, UserSerializer, UpdateUserSerializer
@@ -30,7 +31,7 @@ class GetAuthUserAPIView(generics.ListAPIView):
     serializer_class = UserSerializer
 
     def get_queryset(self):
-        user = User.objects.filter(id=self.request.user.id).prefetch_related('gums__kind_of_sport')
+        user = User.objects.filter(id=self.request.user.id).prefetch_related('gums__city', 'gums__kind_of_sport')
         return user
 
 
@@ -42,3 +43,20 @@ class UpdateUserAPIView(generics.UpdateAPIView):
     def get_queryset(self):
         user = User.objects.filter(pk=self.request.user.pk)
         return user
+
+
+class CustomTokenViewBase(TokenViewBase):
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError as e:
+            raise InvalidToken(e.args[0])
+        user = User.objects.get(email=request.data['email'])
+        serialize_user = UserSerializer(user).data
+        return Response([serializer.validated_data, serialize_user], status=status.HTTP_200_OK)
+
+
+class CustomTokenObtainPairView(TokenObtainPairView, CustomTokenViewBase):
+    pass
