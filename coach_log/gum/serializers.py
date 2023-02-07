@@ -32,3 +32,10 @@ class KindOfSportSerializer(serializers.Serializer):
     kind_of_sport = serializers.StringRelatedField()
 
 
+class InviteCoachSerializer(serializers.Serializer):
+    which_gum = serializers.IntegerField()
+    which_user = serializers.EmailField()
+
+
+
+

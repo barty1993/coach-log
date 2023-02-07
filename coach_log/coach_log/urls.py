@@ -18,7 +18,8 @@ from django.urls import path, include
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from accounts.views import RegisterView, GetAuthUserAPIView, UpdateUserAPIView, CustomTokenObtainPairView
-from gum.views import ListGumAPIView, CreateUpdateGumAPIView, AddKindOfSportAPIView, ListGumForAuthUserAPIView
+from gum.views import ListGumAPIView, CreateUpdateGumAPIView, AddKindOfSportAPIView, ListGumForAuthUserAPIView, \
+    InviteCoachAPIView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -35,5 +36,6 @@ urlpatterns = [
     path('api/gum/auth/', ListGumForAuthUserAPIView.as_view(), name='get all gum for auth user'),
     path('api/gum/create/', CreateUpdateGumAPIView.as_view(), name='create gum'),
     path('api/gum/update/<int:pk>/', CreateUpdateGumAPIView.as_view(), name='update gum'),
-    path('api/gum/addkindofsport/<int:pk>/', AddKindOfSportAPIView.as_view(), name='add kind of sport'),
+    path('api/gum/add/kindofsport/<int:pk>/', AddKindOfSportAPIView.as_view(), name='add kind of sport'),
+    path('api/gum/invite/coach/', InviteCoachAPIView.as_view(), name='invite coach in gum')
 ]

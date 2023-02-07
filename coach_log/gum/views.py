@@ -1,4 +1,3 @@
-from django.forms import model_to_dict
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, status
 from rest_framework.generics import get_object_or_404
@@ -6,8 +5,9 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from gum.models import Gum, City, KindOfSport
-from gum.serializers import GumListSerializer, GumCreateUpdateSerializer, KindOfSportSerializer
+from accounts.models import User
+from gum.models import Gum, City, KindOfSport, CoachInGum
+from gum.serializers import GumListSerializer, GumCreateUpdateSerializer, KindOfSportSerializer, InviteCoachSerializer
 
 
 class ListGumForAuthUserAPIView(generics.ListAPIView):
@@ -100,8 +100,45 @@ class AddKindOfSportAPIView(APIView):
                         data={"message": f"Вид спорта {request.data['kind_of_sport']} успешно добавлен"})
 
 
-
+class GetDetailGum:
+    pass
 
 
 class InviteCoachAPIView(APIView):
-    pass
+    permission_classes = (IsAuthenticated, )
+
+    def post(self, request):
+        serializer = InviteCoachSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            gum = Gum.objects.get(owner=self.request.user, id=request.data['which_gum'])
+        except Exception as e:
+            print(e)
+            return Response(data={'error': f"зал с id {request.data['which_gum']} не принадлежит этому юзеру"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        try:
+            coach = User.objects.get(email=request.data['which_user'])
+        except Exception as e:
+            print(e)
+            return Response(data={'error': f"user with email {request.data['which_user']} does no exist"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        try:
+            coach_in_gum = CoachInGum.objects.get(gum=gum, coach=coach)
+        except Exception as e:
+            print(e)
+            coach_in_gum = None
+        if coach_in_gum:
+            if coach_in_gum.is_agree is False:
+                return Response(data={'error': f"заявка тренеру {coach.email} в обработке"},
+                                status=status.HTTP_200_OK)
+            else:
+                return Response(data={'error': f"тренер {coach.email} числится в вашем зале {gum.id}"},
+                                status=status.HTTP_200_OK)
+        else:
+            add_coach_in_gum = CoachInGum.objects.create(gum=gum,
+                                                         coach=coach)
+            add_coach_in_gum.save()
+        return Response(data={'message': f"заявка тренеру {coach.email} в зал {gum.id} - отправлена"},
+                        status=status.HTTP_201_CREATED)
+
