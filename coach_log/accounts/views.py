@@ -1,3 +1,4 @@
+from django.db.models import Prefetch
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -7,6 +8,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenViewBase
 from accounts.models import User
 from accounts.serializers import RegisterSerializer, UserSerializer, UpdateUserSerializer
 from accounts.service import is_already_exists
+from gum.models import Gum
 
 
 class RegisterView(generics.CreateAPIView):
@@ -31,7 +33,7 @@ class GetAuthUserAPIView(generics.ListAPIView):
     serializer_class = UserSerializer
 
     def get_queryset(self):
-        user = User.objects.filter(id=self.request.user.id).prefetch_related('gums__city', 'gums__kind_of_sport')
+        user = User.objects.filter(id=self.request.user.id)
         return user
 
 

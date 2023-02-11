@@ -7,7 +7,8 @@ from rest_framework.views import APIView
 
 from accounts.models import User
 from gum.models import Gum, City, KindOfSport, CoachInGum
-from gum.serializers import GumListSerializer, GumCreateUpdateSerializer, KindOfSportSerializer, InviteCoachSerializer
+from gum.serializers import GumListSerializer, GumCreateUpdateSerializer, KindOfSportSerializer, InviteCoachSerializer, \
+    GumDetailSerializer, DeclineAcceptInviteSerializer
 
 
 class ListGumForAuthUserAPIView(generics.ListAPIView):
@@ -24,7 +25,7 @@ class ListGumForAuthUserAPIView(generics.ListAPIView):
 
 
 class ListGumAPIView(generics.ListAPIView):
-    """Вывожит список залов для не аутентифицированных пользователей с фильтрацией по
+    """Выводит список залов для не аутентифицированных пользователей с фильтрацией по
     city__name, kind_of_sport__name"""
 
     queryset = Gum.objects.all()
@@ -36,6 +37,12 @@ class ListGumAPIView(generics.ListAPIView):
     def get_queryset(self):
         queryset = Gum.objects.all().prefetch_related('kind_of_sport').prefetch_related('city').select_related('owner')
         return queryset
+
+
+class DetailGumAPIView(generics.RetrieveAPIView):
+    queryset = Gum.objects.all().select_related('owner')
+    serializer_class = GumDetailSerializer
+    permission_classes = (AllowAny, )
 
 
 class CreateUpdateGumAPIView(APIView):
@@ -100,33 +107,25 @@ class AddKindOfSportAPIView(APIView):
                         data={"message": f"Вид спорта {request.data['kind_of_sport']} успешно добавлен"})
 
 
-class GetDetailGum:
-    pass
-
-
 class InviteCoachAPIView(APIView):
     permission_classes = (IsAuthenticated, )
 
     def post(self, request):
         serializer = InviteCoachSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         try:
             gum = Gum.objects.get(owner=self.request.user, id=request.data['which_gum'])
-        except Exception as e:
-            print(e)
+        except:
             return Response(data={'error': f"зал с id {request.data['which_gum']} не принадлежит этому юзеру"},
                             status=status.HTTP_400_BAD_REQUEST)
         try:
             coach = User.objects.get(email=request.data['which_user'])
-        except Exception as e:
-            print(e)
+        except:
             return Response(data={'error': f"user with email {request.data['which_user']} does no exist"},
                             status=status.HTTP_400_BAD_REQUEST)
         try:
             coach_in_gum = CoachInGum.objects.get(gum=gum, coach=coach)
-        except Exception as e:
-            print(e)
+        except:
             coach_in_gum = None
         if coach_in_gum:
             if coach_in_gum.is_agree is False:
@@ -141,4 +140,36 @@ class InviteCoachAPIView(APIView):
             add_coach_in_gum.save()
         return Response(data={'message': f"заявка тренеру {coach.email} в зал {gum.id} - отправлена"},
                         status=status.HTTP_201_CREATED)
+
+    def put(self, request, *args, **kwargs):
+        pk = kwargs.get('pk', None)
+        if not pk:
+            return Response({"error": "Method PUT not allowed"})
+        serializer = DeclineAcceptInviteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            coach_in_gum = CoachInGum.objects.get(gum_id=pk, coach_id=request.user.id, is_agree=False)
+        except:
+            return Response(data={'error': f'заявки в зал {pk} не существует'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        coach_in_gum.is_agree = serializer.data['is_agree']
+        coach_in_gum.save()
+        if serializer.data['is_agree']:
+            return Response(data={'message': f'заявка на вступение в зал {pk} принята'},
+                            status=status.HTTP_200_OK)
+        return Response(data={'message': f'заявка на вступление в зал {pk} осталась неизменной'},
+                        status=status.HTTP_200_OK)
+
+    def delete(self, request, *args, **kwargs):
+        pk = kwargs.get('pk', None)
+        if not pk:
+            return Response({"error": "Method DELETE not allowed"})
+        try:
+            coach_in_gum = CoachInGum.objects.get(gum_id=pk, coach_id=request.user.id, is_agree=False)
+        except:
+            return Response(data={'error': f'приглашения в зал {pk} не существует'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        coach_in_gum.delete()
+        return Response(data={'message': f'приглашение из зала {pk} отклонено'},
+                        status=status.HTTP_204_NO_CONTENT)
 

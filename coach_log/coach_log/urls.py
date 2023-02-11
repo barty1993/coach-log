@@ -19,7 +19,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 from accounts.views import RegisterView, GetAuthUserAPIView, UpdateUserAPIView, CustomTokenObtainPairView
 from gum.views import ListGumAPIView, CreateUpdateGumAPIView, AddKindOfSportAPIView, ListGumForAuthUserAPIView, \
-    InviteCoachAPIView
+    InviteCoachAPIView, DetailGumAPIView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -33,9 +33,12 @@ urlpatterns = [
     path('api/user/update/<int:pk>/', UpdateUserAPIView.as_view(), name='update user'),
 
     path('api/gum/', ListGumAPIView.as_view(), name='get all gums'),
+    path('api/gum/<int:pk>/', DetailGumAPIView.as_view(), name='get detail gum'),
     path('api/gum/auth/', ListGumForAuthUserAPIView.as_view(), name='get all gum for auth user'),
     path('api/gum/create/', CreateUpdateGumAPIView.as_view(), name='create gum'),
     path('api/gum/update/<int:pk>/', CreateUpdateGumAPIView.as_view(), name='update gum'),
     path('api/gum/add/kindofsport/<int:pk>/', AddKindOfSportAPIView.as_view(), name='add kind of sport'),
-    path('api/gum/invite/coach/', InviteCoachAPIView.as_view(), name='invite coach in gum')
+    path('api/gum/invite/coach/', InviteCoachAPIView.as_view(), name='invite coach in gum'),
+    path('api/gum/invite/coach/<int:pk>/', InviteCoachAPIView.as_view(), name='update or delete invites'),
+
 ]

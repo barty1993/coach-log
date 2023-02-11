@@ -36,7 +36,7 @@ class Gum(models.Model):
 
 
 class CoachInGum(models.Model):
-    gum = models.ForeignKey(Gum, on_delete=models.CASCADE)
-    coach = models.ForeignKey(User, on_delete=models.CASCADE)
+    gum = models.ForeignKey(Gum, on_delete=models.CASCADE, related_name='gum')
+    coach = models.ForeignKey(User, on_delete=models.CASCADE, related_name='coach')
     is_agree = models.BooleanField(default=False)
 

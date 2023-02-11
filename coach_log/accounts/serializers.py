@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from accounts.models import User
-from gum.serializers import GumListSerializer
+from gum.models import Gum
+from gum.serializers import GumListSerializer, GumDetailSerializer
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -34,12 +35,18 @@ class UserSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField()
     birthday = serializers.DateField()
     about_me = serializers.CharField()
+    invite = serializers.SerializerMethodField()
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault())
     gums = GumListSerializer(many=True)
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'birthday', 'about_me', 'user', 'gums')
+        fields = ('id', 'email', 'first_name', 'last_name', 'birthday', 'about_me', 'user','invite', 'gums')
+
+    def get_invite(self, instance):
+        gums = Gum.objects.filter(coaches=instance, gum__is_agree=False).prefetch_related('owner', 'kind_of_sport', 'city')
+        serializer = GumListSerializer(gums, many=True).data
+        return serializer
 
 
 class UpdateUserSerializer(serializers.ModelSerializer):

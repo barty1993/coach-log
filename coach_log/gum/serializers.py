@@ -1,7 +1,18 @@
 import re
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from accounts.models import User
 from gum.models import Gum
+
+
+class UserSerializerForDetailGum(serializers.ModelSerializer):
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    birthday = serializers.DateField()
+    about_me = serializers.CharField()
+    class Meta:
+        model = User
+        fields = ('id', 'avatar', 'first_name', 'last_name', 'birthday', 'about_me')
 
 
 class GumListSerializer(serializers.ModelSerializer):
@@ -11,7 +22,23 @@ class GumListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Gum
-        fields = ('id','owner', 'avatar', 'city', 'title','address', 'about_gum', 'phone', 'kind_of_sport')
+        fields = ('id','owner', 'avatar', 'city', 'title', 'address', 'kind_of_sport')
+
+
+class GumDetailSerializer(serializers.ModelSerializer):
+    owner = UserSerializerForDetailGum()
+    city = serializers.StringRelatedField()
+    kind_of_sport = serializers.StringRelatedField(many=True)
+    coaches = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Gum
+        fields = ('id', 'city', 'owner', 'avatar', 'title', 'address', 'phone', 'kind_of_sport', 'coaches')
+
+    def get_coaches(self, instance):
+        coaches = User.objects.filter(gum=instance, coach__is_agree=True)
+        serializer = UserSerializerForDetailGum(coaches, many=True).data
+        return serializer
 
 
 class GumCreateUpdateSerializer(serializers.Serializer):
@@ -37,5 +64,6 @@ class InviteCoachSerializer(serializers.Serializer):
     which_user = serializers.EmailField()
 
 
-
+class DeclineAcceptInviteSerializer(serializers.Serializer):
+    is_agree = serializers.BooleanField()
 
