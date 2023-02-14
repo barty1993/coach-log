@@ -33,7 +33,7 @@ class GetAuthUserAPIView(generics.ListAPIView):
     serializer_class = UserSerializer
 
     def get_queryset(self):
-        user = User.objects.filter(id=self.request.user.id)
+        user = User.objects.filter(id=self.request.user.id).prefetch_related('gums', 'gums__city', 'gums__kind_of_sport')
         return user
 
 

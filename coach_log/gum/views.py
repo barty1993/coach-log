@@ -165,11 +165,11 @@ class InviteCoachAPIView(APIView):
         if not pk:
             return Response({"error": "Method DELETE not allowed"})
         try:
-            coach_in_gum = CoachInGum.objects.get(gum_id=pk, coach_id=request.user.id, is_agree=False)
+            coach_in_gum = CoachInGum.objects.get(gum_id=pk, coach_id=request.user.id)
         except:
-            return Response(data={'error': f'приглашения в зал {pk} не существует'},
+            return Response(data={'error': f'невозможно выполнить действие с залом {pk}'},
                             status=status.HTTP_400_BAD_REQUEST)
         coach_in_gum.delete()
-        return Response(data={'message': f'приглашение из зала {pk} отклонено'},
+        return Response(data={'message': f'вас больше ничего не связывает с залом{pk}'},
                         status=status.HTTP_204_NO_CONTENT)
 
