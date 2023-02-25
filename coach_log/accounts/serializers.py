@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from accounts.models import User
 from gum.models import Gum
-from gum.serializers import GumListSerializer, GumDetailSerializer
+from gum.serializers import GumListSerializer
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -11,10 +11,11 @@ class RegisterSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(required=True, min_length=2)
     birthday = serializers.DateField(default=None)
     about_me = serializers.CharField(default=None)
+
     class Meta:
         model = User
-        fields = ('email', 'first_name', 'last_name', 'birthday', 'about_me', 'password')
-
+        fields = ('email', 'first_name', 'last_name',
+                  'birthday', 'about_me', 'password')
 
     def create(self, validated_data):
         user = User.objects.create(
@@ -40,17 +41,22 @@ class UserSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault())
     gums = GumListSerializer(many=True)
+
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'birthday', 'about_me', 'user', 'coach_in', 'invite', 'gums')
+        fields = ('id', 'email', 'first_name',
+                  'last_name', 'birthday', 'about_me',
+                  'user', 'coach_in', 'invite', 'gums')
 
     def get_invite(self, instance):
-        gums = Gum.objects.filter(coaches=instance, gum__is_agree=False).prefetch_related('owner', 'kind_of_sport', 'city')
+        gums = Gum.objects.filter(coaches=instance, gum__is_agree=False)\
+            .prefetch_related('owner', 'kind_of_sport', 'city')
         serializer = GumListSerializer(gums, many=True).data
         return serializer
 
     def get_coach_in(self, instance):
-        gums = Gum.objects.filter(coaches=instance, gum__is_agree=True).prefetch_related('owner', 'kind_of_sport', 'city')
+        gums = Gum.objects.filter(coaches=instance, gum__is_agree=True)\
+            .prefetch_related('owner', 'kind_of_sport', 'city')
         serializer = GumListSerializer(gums, many=True).data
         return serializer
 
@@ -62,6 +68,9 @@ class UpdateUserSerializer(serializers.ModelSerializer):
     about_me = serializers.CharField()
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault())
+
     class Meta:
         model = User
-        fields = ('id', 'first_name', 'last_name', 'birthday', 'about_me', 'user')
+        fields = ('id', 'first_name',
+                  'last_name', 'birthday',
+                  'about_me', 'user')

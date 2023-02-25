@@ -1,4 +1,3 @@
-from django.db.models import Prefetch
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -6,9 +5,9 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenViewBase
 
 from accounts.models import User
-from accounts.serializers import RegisterSerializer, UserSerializer, UpdateUserSerializer
+from accounts.serializers import RegisterSerializer, UserSerializer,\
+    UpdateUserSerializer
 from accounts.service import is_already_exists
-from gum.models import Gum
 
 
 class RegisterView(generics.CreateAPIView):
@@ -18,13 +17,16 @@ class RegisterView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         if is_already_exists(request):
-            return Response(status=status.HTTP_400_BAD_REQUEST, data={"error": "email already exists"})
+            return Response(status=status.HTTP_400_BAD_REQUEST,
+                            data={"error": "email already exists"})
         else:
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            return Response(serializer.data,
+                            status=status.HTTP_201_CREATED,
+                            headers=headers)
 
 
 class GetAuthUserAPIView(generics.ListAPIView):
@@ -33,7 +35,8 @@ class GetAuthUserAPIView(generics.ListAPIView):
     serializer_class = UserSerializer
 
     def get_queryset(self):
-        user = User.objects.filter(id=self.request.user.id).prefetch_related('gums', 'gums__city', 'gums__kind_of_sport')
+        user = User.objects.filter(id=self.request.user.id)\
+            .prefetch_related('gums', 'gums__city', 'gums__kind_of_sport')
         return user
 
 
@@ -57,7 +60,8 @@ class CustomTokenViewBase(TokenViewBase):
             raise InvalidToken(e.args[0])
         user = User.objects.get(email=request.data['email'])
         serialize_user = UserSerializer(user).data
-        return Response([serializer.validated_data, serialize_user], status=status.HTTP_200_OK)
+        return Response([serializer.validated_data, serialize_user],
+                        status=status.HTTP_200_OK)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView, CustomTokenViewBase):

@@ -22,7 +22,7 @@ class GumListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Gum
-        fields = ('id','owner', 'avatar', 'city', 'title', 'address', 'kind_of_sport')
+        fields = ('id', 'owner', 'avatar', 'city', 'title', 'address', 'kind_of_sport')
 
 
 class GumDetailSerializer(serializers.ModelSerializer):

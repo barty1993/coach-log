@@ -31,5 +31,8 @@ class Membership(models.Model):
     athlete = models.ForeignKey(Athlete, on_delete=models.CASCADE)
     date_joined = models.DateField(auto_now_add=True)
 
+    def __str__(self):
+        return f"группа: {self.group.title}, спортсмен: {self.athlete.last_name}"
+
 
 

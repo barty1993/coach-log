@@ -14,12 +14,12 @@ from gum.serializers import GumListSerializer, GumCreateUpdateSerializer, KindOf
 class ListGumForAuthUserAPIView(generics.ListAPIView):
     queryset = Gum.objects.all()
     serializer_class = GumListSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        queryset = Gum.objects.filter(owner=self.request.user).\
-            prefetch_related('kind_of_sport').\
-            prefetch_related('city').\
+        queryset = Gum.objects.filter(owner=self.request.user). \
+            prefetch_related('kind_of_sport'). \
+            prefetch_related('city'). \
             select_related('owner')
         return queryset
 
@@ -30,8 +30,8 @@ class ListGumAPIView(generics.ListAPIView):
 
     queryset = Gum.objects.all()
     serializer_class = GumListSerializer
-    permission_classes = (AllowAny, )
-    filter_backends = (DjangoFilterBackend, )
+    permission_classes = (AllowAny,)
+    filter_backends = (DjangoFilterBackend,)
     filterset_fields = ['city__name', 'kind_of_sport__name', ]
 
     def get_queryset(self):
@@ -42,11 +42,11 @@ class ListGumAPIView(generics.ListAPIView):
 class DetailGumAPIView(generics.RetrieveAPIView):
     queryset = Gum.objects.all().select_related('owner')
     serializer_class = GumDetailSerializer
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
 
 
 class CreateUpdateGumAPIView(APIView):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
         serializer = GumCreateUpdateSerializer(data=request.data)
@@ -83,10 +83,9 @@ class CreateUpdateGumAPIView(APIView):
 
 
 class AddKindOfSportAPIView(APIView):
-
     """Добавляет 1 вид спорта переданный в запросе (если он создан в базе данных)"""
 
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
         serializer = KindOfSportSerializer(data=request.data)
@@ -108,7 +107,7 @@ class AddKindOfSportAPIView(APIView):
 
 
 class InviteCoachAPIView(APIView):
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
         serializer = InviteCoachSerializer(data=request.data)
@@ -172,4 +171,3 @@ class InviteCoachAPIView(APIView):
         coach_in_gum.delete()
         return Response(data={'message': f'вас больше ничего не связывает с залом{pk}'},
                         status=status.HTTP_204_NO_CONTENT)
-

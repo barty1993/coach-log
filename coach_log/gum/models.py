@@ -40,3 +40,5 @@ class CoachInGum(models.Model):
     coach = models.ForeignKey(User, on_delete=models.CASCADE, related_name='coach')
     is_agree = models.BooleanField(default=False)
 
+    def __str__(self):
+        return f"Тренер: {self.coach.last_name}, зал: {self.gum.title}, статус: {self.is_agree}"

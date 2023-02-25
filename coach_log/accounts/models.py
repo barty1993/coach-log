@@ -7,7 +7,9 @@ from accounts.Validators import set_validate_birthday_or_none
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
-    def create_user(self, email, password=None, first_name=None, last_name=None, birthday=None, avatar=None, about_me=None,
+    def create_user(self, email, password=None,
+                    first_name=None, last_name=None,
+                    birthday=None, avatar=None, about_me=None,
                     is_active=None, is_staff=None, is_admin=None
                     ):
         """
@@ -18,7 +20,10 @@ class UserManager(BaseUserManager):
         if not password:
             raise ValueError("The given password must be set")
         email = self.normalize_email(email)
-        user = self.model(email=email, first_name=first_name, last_name=last_name, birthday=birthday)
+        user = self.model(email=email,
+                          first_name=first_name,
+                          last_name=last_name,
+                          birthday=birthday)
         user.set_password(password)
         user.staff = is_staff
         user.avatar = avatar

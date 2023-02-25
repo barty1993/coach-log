@@ -1,4 +1,3 @@
-from django.test import TestCase
 from accounts.models import User
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
@@ -23,4 +22,3 @@ class UserApiTestCase(APITestCase):
         user = User.objects.get(email="test@test.ru")
         serializer_data = RegisterSerializer(user).data
         self.assertEqual(serializer_data, response.data)
-
