@@ -3,6 +3,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from accounts.models import User
 from gum.models import Gum
+from log.models import Group
+from log.serializers import ListGroupSerializer
 
 
 class UserSerializerForDetailGum(serializers.ModelSerializer):
@@ -30,14 +32,23 @@ class GumDetailSerializer(serializers.ModelSerializer):
     city = serializers.StringRelatedField()
     kind_of_sport = serializers.StringRelatedField(many=True)
     coaches = serializers.SerializerMethodField()
+    groups = serializers.SerializerMethodField()
 
     class Meta:
         model = Gum
-        fields = ('id', 'city', 'owner', 'avatar', 'title', 'address', 'phone', 'kind_of_sport', 'coaches')
+        fields = ('id', 'city', 'owner', 'avatar',
+                  'title', 'address', 'phone',
+                  'kind_of_sport', 'coaches', 'groups')
 
     def get_coaches(self, instance):
         coaches = User.objects.filter(gum=instance, coach__is_agree=True)
         serializer = UserSerializerForDetailGum(coaches, many=True).data
+        return serializer
+
+    def get_groups(self, instance):
+        groups = Group.objects.filter(gum__owner=instance.owner).prefetch_related('coach',
+                                                                                  'kind_of_sport')
+        serializer = ListGroupSerializer(groups, many=True).data
         return serializer
 
 

@@ -20,7 +20,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from accounts.views import RegisterView, GetAuthUserAPIView, UpdateUserAPIView, CustomTokenObtainPairView
 from gum.views import ListGumAPIView, CreateUpdateGumAPIView, AddKindOfSportAPIView, ListGumForAuthUserAPIView, \
     InviteCoachAPIView, DetailGumAPIView
-from log.views import CreateUpdateAthleteAPIView, GroupAPIView
+from log.views import CreateUpdateAthleteAPIView, GroupAPIView, AddAthleteInGroup
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -43,7 +43,8 @@ urlpatterns = [
     path('api/gum/invite/coach/<int:pk>/', InviteCoachAPIView.as_view(), name='update or delete invites'),
 
     path('api/athlete/', CreateUpdateAthleteAPIView.as_view(), name='create Athlete'),
-    path('api/athlete/<int:pk>/', CreateUpdateAthleteAPIView.as_view(), name='update Athlete'),
-    path('api/group/', GroupAPIView.as_view(), name='create, update, delete Group'),
-    path('api/group/<int:pk>/', GroupAPIView.as_view()),
+    path('api/athlete/<int:pk>/', CreateUpdateAthleteAPIView.as_view(), name='update, delete Athlete'),
+    path('api/group/', GroupAPIView.as_view(), name='create, Group'),
+    path('api/group/<int:pk>/', GroupAPIView.as_view(), name='Update, delete group'),
+    path('api/addathlete/', AddAthleteInGroup.as_view())
 ]

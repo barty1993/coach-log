@@ -1,5 +1,4 @@
 from rest_framework import serializers
-
 from log.models import Athlete
 
 
@@ -19,3 +18,15 @@ class CreateGroupSerializer(serializers.Serializer):
 class UpdateGroupSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=255)
     coach_id = serializers.IntegerField()
+
+
+class ListGroupSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    coach = serializers.StringRelatedField()
+    title = serializers.CharField(max_length=255)
+    kind_of_sport = serializers.StringRelatedField()
+
+
+class AddAthleteSerializer(serializers.Serializer):
+    group_id = serializers.IntegerField()
+    athlete_id = serializers.ListField(child=serializers.IntegerField())

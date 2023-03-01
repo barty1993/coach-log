@@ -1,14 +1,15 @@
 from django.forms import model_to_dict
 from rest_framework import status
-from rest_framework.generics import get_object_or_404
+from rest_framework.generics import get_object_or_404, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 R = Response({"error": "Method DELETE not allowed"})
 from rest_framework.views import APIView
 
-from log.serializers import CreateUpdateAthleteSerializer, CreateGroupSerializer, UpdateGroupSerializer
-from log.models import Athlete, Group
+from log.serializers import CreateUpdateAthleteSerializer, CreateGroupSerializer, UpdateGroupSerializer, \
+    AddAthleteSerializer
+from log.models import Athlete, Group, Membership
 from log.service import get_gum_or_none, \
     get_athlete_or_none, \
     get_kind_of_sport_or_none, \
@@ -21,11 +22,9 @@ class CreateUpdateAthleteAPIView(APIView):
     def post(self, request):
         serializer = CreateUpdateAthleteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         gum = get_gum_or_none(request.data['gum'], request.user)
         if not gum:
             return Response(data={'error': f"нету прав на добавление атлета в зал {request.data['gum']}"})
-
         new_athlete = Athlete.objects.create(first_name=request.data['first_name'],
                                              last_name=request.data['last_name'],
                                              birthday=request.data['birthday'],
@@ -74,11 +73,45 @@ class CreateUpdateAthleteAPIView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class AddAthleteInGroup(APIView):
+    permission_classes = (IsAuthenticated, )
+
+    def post(self, request):
+        serializer = AddAthleteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if not request.data['athlete_id']:
+            return Response(data={'message': 'внесите id спортсменов в список'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        group = get_group_or_none(request.data['group_id'], request.user)
+        if not group:
+            return Response(data={'error': f"Невозможно добавить атлета в группу{request.data['group_id']}"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        gum_athletes_id = [athlete.id for athlete in Athlete.objects.filter(gum=group.gum)]
+        membership_athletes_id = [member.athlete_id for member in Membership.objects.filter(group=group)]
+        not_valid_athlete = {}
+        valid_athlete = {}
+        for id in request.data['athlete_id']:
+            if id not in gum_athletes_id:
+                not_valid_athlete[id] = f"не числится в зале {group.gum.id}"
+                continue
+            if id in membership_athletes_id:
+                not_valid_athlete[id] = f"уже записан в группе {group.id}"
+                continue
+            valid = not_valid_athlete.get(id, None)
+            already_save = valid_athlete.get(id, None)
+            if not valid and not already_save:
+                add_athlete = Membership.objects.create(group_id=request.data['group_id'],
+                                                        athlete_id=id)
+                valid_athlete[id] = f"Добавлен в группу {request.data['group_id']}"
+        return Response(data=[{'bad': not_valid_athlete}, {'good': valid_athlete}],
+                        status=status.HTTP_200_OK)
+
+
 class GroupAPIView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        """создать группу"""
         serializer = CreateGroupSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         gum = get_gum_or_none(request.data['gum_id'], request.user)
@@ -100,7 +133,6 @@ class GroupAPIView(APIView):
                         status=status.HTTP_201_CREATED)
 
     def put(self, request, *args, **kwargs):
-        """изменить данные группы"""
         pk = kwargs.get('pk', None)
         if not pk:
             return Response(data={'error': 'Method PUT not allowed'},
@@ -123,5 +155,21 @@ class GroupAPIView(APIView):
         return Response(data=model_to_dict(group),
                         status=status.HTTP_200_OK)
 
-    def delete(self):
+    def delete(self, request, *args, **kwargs):
         """удалить группу"""
+        pk = kwargs.get('pk', None)
+        if not pk:
+            return Response(data={'error': 'Method DELETE not allowed'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        group = get_group_or_none(pk, request.user)
+        if not group:
+            return Response(data={'error': f"Вы не можете удалить группу {pk}"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        group.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class DetailGroupAPIView(RetrieveAPIView):
+    queryset = Group.objects.all()
+    permission_classes = (IsAuthenticated,)
+    pass
