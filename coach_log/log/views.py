@@ -1,14 +1,14 @@
 from django.forms import model_to_dict
 from rest_framework import status
 from rest_framework.generics import get_object_or_404, RetrieveAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 R = Response({"error": "Method DELETE not allowed"})
 from rest_framework.views import APIView
 
 from log.serializers import CreateUpdateAthleteSerializer, CreateGroupSerializer, UpdateGroupSerializer, \
-    AddAthleteSerializer
+    AddAthleteSerializer, DetailGroupSerializer
 from log.models import Athlete, Group, Membership
 from log.service import get_gum_or_none, \
     get_athlete_or_none, \
@@ -170,6 +170,7 @@ class GroupAPIView(APIView):
 
 
 class DetailGroupAPIView(RetrieveAPIView):
-    queryset = Group.objects.all()
+    queryset = Group.objects.all().select_related('kind_of_sport', 'coach')
     permission_classes = (IsAuthenticated,)
-    pass
+    serializer_class = DetailGroupSerializer
+
