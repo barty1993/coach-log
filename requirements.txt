@@ -6,9 +6,14 @@ django-filter==22.1
 django-nine==0.2.7
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2
+flake8==6.0.0
+mccabe==0.7.0
 packaging==23.0
 Pillow==9.4.0
 psycopg2-binary==2.9.5
+pycodestyle==2.10.0
+pyflakes==3.0.1
 PyJWT==2.6.0
+python-decouple==3.8
 pytz==2022.7.1
 sqlparse==0.4.3
